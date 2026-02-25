@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Wishlist, Product, WishlistItem, ProfileType, MicroItem, User, Friendship } from './types';
 import { useAppContext } from './AppContext';
 import Header from './components/Header';
@@ -518,6 +519,7 @@ export const App = () => {
             }} 
           />
       )}
+      <SpeedInsights />
     </div>
   );
 };
