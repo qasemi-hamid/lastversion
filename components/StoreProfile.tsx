@@ -4,7 +4,6 @@ import { User, Product, Review, Wishlist } from '../types';
 import { getMerchantProducts, getMerchantReviews, toggleFollow, submitReview } from '../services/api';
 import ReviewModal from './ReviewModal';
 import { ExploreProductSkeleton } from './Skeleton';
-import { useAppContext } from '../AppContext';
 
 interface StoreProfileProps {
   currentUser: User | null;
@@ -22,14 +21,13 @@ const VerifiedBadge = ({ className }: { className?: string }) => (
 );
 const ShieldCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-emerald-500" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>;
 const GiftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clipRule="evenodd" /><path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z" /></svg>;
-const HeartIcon = ({ filled }: { filled?: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 ${filled ? 'fill-current' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>;
 
-const StoreProfile: React.FC<StoreProfileProps> = ({ merchant, onBack, onAddToWishlist }) => {
-    const { myWishlists } = useAppContext();
+const StoreProfile: React.FC<StoreProfileProps> = ({ currentUser, merchant, onBack, onAddToWishlist, userWishlists }) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'products' | 'reviews'>('products');
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     useEffect(() => { loadStoreData(); }, [merchant.id]);
 
@@ -45,13 +43,6 @@ const StoreProfile: React.FC<StoreProfileProps> = ({ merchant, onBack, onAddToWi
         } finally { 
             setTimeout(() => setIsLoading(false), 600); 
         }
-    };
-
-    // بررسی اینکه آیا خود کاربر این محصول را در لیست‌هایش دارد
-    const isAlreadyWished = (productId: string) => {
-        return myWishlists.some(list => 
-            list.items.some(item => item.productId === productId)
-        );
     };
 
     return (
@@ -101,24 +92,10 @@ const StoreProfile: React.FC<StoreProfileProps> = ({ merchant, onBack, onAddToWi
                         {products.map(p => {
                             const isOutOfStock = p.stock <= 0;
                             const hasReservations = p.reservedStock > 0;
-                            const wishedByMe = isAlreadyWished(p.id);
-                            
                             return (
                                 <div key={p.id} className={`bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col group transition-all hover:shadow-2xl ${isOutOfStock ? 'opacity-60 grayscale' : ''}`}>
                                     <div className="aspect-square bg-slate-50 dark:bg-slate-800 relative overflow-hidden">
                                         {p.imageUrl && <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />}
-                                        
-                                        {/* آمار محصول */}
-                                        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center pointer-events-none">
-                                            <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
-                                                <HeartIcon filled={true} />
-                                                <span className="text-[9px] font-black text-rose-600">{(p.id.length % 5 + 1).toLocaleString('fa-IR')}</span>
-                                            </div>
-                                            <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
-                                                <span className="text-[9px] font-black text-slate-500">📦 {p.stock.toLocaleString('fa-IR')}</span>
-                                            </div>
-                                        </div>
-
                                         {isOutOfStock && (
                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                                 <span className="bg-white text-slate-900 px-4 py-1.5 rounded-full font-black text-[10px] shadow-xl uppercase">ناموجود</span>
@@ -133,31 +110,19 @@ const StoreProfile: React.FC<StoreProfileProps> = ({ merchant, onBack, onAddToWi
                                     <div className="p-5 flex flex-col flex-grow">
                                         <h4 className="font-black text-xs text-slate-800 dark:text-white line-clamp-2 mb-1 leading-relaxed h-10">{p.name}</h4>
                                         <div className="flex justify-between items-center mb-3">
+                                            <span className="text-[9px] font-bold text-slate-400">موجودی: {p.stock}</span>
                                             <p className="text-base font-black text-emerald-600">{p.price?.toLocaleString('fa-IR')} ت</p>
                                         </div>
-                                        
                                         <button 
-                                            onClick={() => !isOutOfStock && !wishedByMe && onAddToWishlist(p)} 
-                                            disabled={isOutOfStock || wishedByMe}
+                                            onClick={() => !isOutOfStock && onAddToWishlist(p)} 
+                                            disabled={isOutOfStock}
                                             className={`w-full py-3 rounded-2xl text-[11px] font-black flex items-center justify-center gap-2 transition-all shadow-lg ${
                                                 isOutOfStock 
                                                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                                                : wishedByMe
-                                                ? 'bg-rose-600 text-white cursor-default'
-                                                : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-rose-600 hover:text-white active:scale-95'
+                                                : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 active:scale-95'
                                             }`}
                                         >
-                                            {wishedByMe ? (
-                                                <>
-                                                    <HeartIcon filled={true} />
-                                                    <span>آرزو کردی</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <GiftIcon />
-                                                    <span>{isOutOfStock ? 'موجود نیست' : 'آرزو کن'}</span>
-                                                </>
-                                            )}
+                                            <GiftIcon /> {isOutOfStock ? 'موجود نیست' : 'آرزو کن'}
                                         </button>
                                     </div>
                                 </div>

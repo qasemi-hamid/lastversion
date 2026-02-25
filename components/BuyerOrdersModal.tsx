@@ -28,9 +28,7 @@ const BuyerOrdersModal: React.FC<BuyerOrdersModalProps> = ({ isOpen, onClose, cu
             const filtered = orders.filter(o => 
                 activeTab === 'purchased' ? o.buyerId === currentUser.id : o.receiverId === currentUser.id
             );
-            setTimeout(() => {
-                setCurrentOrders(filtered.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-            }, 0);
+            setCurrentOrders(filtered.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         }
     }, [isOpen, orders, activeTab, currentUser.id]);
 

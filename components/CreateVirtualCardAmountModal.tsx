@@ -33,13 +33,11 @@ const CreateVirtualCardAmountModal: React.FC<CreateVirtualCardAmountModalProps> 
 
   useEffect(() => {
       if (isOpen) {
-          setTimeout(() => {
-              setAmount(0);
-              setError('');
-              setView('amount');
-              setOtpInput('');
-              setOtpSent(false);
-          }, 0);
+          setAmount(0);
+          setError('');
+          setView('amount');
+          setOtpInput('');
+          setOtpSent(false);
       }
   }, [isOpen]);
 

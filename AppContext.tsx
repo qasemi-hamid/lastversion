@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { User, Wishlist, Notification, Friendship, MicroItem, WishlistItem, ProfileType } from './types';
 import * as api from './services/api';
 import { db } from './services/database';
@@ -57,6 +57,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
   const lastFetchRef = useRef<number>(0);
+  const isInitialBootRef = useRef<boolean>(true);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -65,48 +66,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const refreshData = useCallback(async (force = false) => {
     const now = Date.now();
-    if (!force && now - lastFetchRef.current < 3000 && !isInitialBoot) return;
+    // Use a local check instead of relying on isSyncing in dependencies to avoid loops
+    // Increased throttle to 5s for better stability
+    if (!force && now - lastFetchRef.current < 5000 && !isInitialBootRef.current) return;
     
     setIsSyncing(true);
     lastFetchRef.current = now;
+    setFetchError(false);
+
     try {
       const users = await api.getAllUsersForAdmin();
+      if (!users) throw new Error("Failed to fetch users");
+      
       setAllUsers(users);
       
       const micros = await api.getActiveMicroItems();
-      setMicroItems(micros);
+      setMicroItems(micros || []);
 
       if (currentUser) {
           const fresh = users.find(u => u.id === currentUser.id);
-          if (fresh && (fresh.name !== currentUser.name || fresh.role !== currentUser.role || fresh.shahkarVerified !== currentUser.shahkarVerified)) {
-              setCurrentUser(fresh);
-          }
+          if (fresh) setCurrentUser(fresh);
       }
+      
       const results = await Promise.allSettled([
         currentUser ? api.getMyWishlists(currentUser.id) : Promise.resolve([]),
         api.getPublicCampaigns(),
         currentUser ? api.getFriendships(currentUser.id) : Promise.resolve([])
       ]);
       
-      if (results[0].status === 'fulfilled') setMyWishlists(results[0].value);
-      if (results[1].status === 'fulfilled') setPublicCampaigns(results[1].value);
+      if (results[0].status === 'fulfilled') setMyWishlists(results[0].value || []);
+      if (results[1].status === 'fulfilled') setPublicCampaigns(results[1].value || []);
       if (currentUser && results[2].status === 'fulfilled') {
-        const fs = results[2].value;
+        const fs = results[2].value || [];
         setFriendships(fs);
         const fIds = fs.filter(f => f.status === 'accepted').map(f => f.requesterId === currentUser.id ? f.receiverId : f.requesterId);
         if (fIds.length > 0) {
-            const fw = await api.getWishlistsByOwners(fIds);
-            setFriendsWishlists(fw);
+            api.getWishlistsByOwners(fIds).then(fw => setFriendsWishlists(fw || [])).catch(() => {});
         }
       }
-      setFetchError(false);
-    } catch (err) { setFetchError(true); } finally { 
+    } catch (err) { 
+      setFetchError(true); 
+    } finally { 
       setIsSyncing(false); 
-      if (isInitialBoot) setIsInitialBoot(false);
+      setIsInitialBoot(false); 
+      isInitialBootRef.current = false;
     }
-  }, [currentUser, isInitialBoot]);
+  }, [currentUser?.id]); // Removed isSyncing from dependencies to break the loop
 
-  useEffect(() => { refreshData(); }, [refreshData]);
+  useEffect(() => { refreshData(); }, [currentUser?.id, refreshData]);
 
   const login = async (creds: any): Promise<User> => {
     setIsSyncing(true);
@@ -228,19 +235,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const value = useMemo(() => ({
+  const value = {
     currentUser, myWishlists, publicCampaigns, friendsWishlists, notifications, friendships, allUsers, microItems,
     isSyncing, fetchError, isInitialBoot, toast,
     login, logout, refreshData, updateUser, showToast,
     addItem, editItem, removeItem, createList, editList, removeList,
     claim, unclaim, sendRequest, acceptRequest, declineOrRemove, addMicroItem
-  }), [
-    currentUser, myWishlists, publicCampaigns, friendsWishlists, notifications, friendships, allUsers, microItems,
-    isSyncing, fetchError, isInitialBoot, toast,
-    login, logout, refreshData, updateUser, showToast,
-    addItem, editItem, removeItem, createList, editList, removeList,
-    claim, unclaim, sendRequest, acceptRequest, declineOrRemove, addMicroItem
-  ]);
+  };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

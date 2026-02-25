@@ -116,15 +116,15 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
                 </span>
             )}
             {item.allowOffers && !isFullyFunded && (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-lg ring-2 ring-white dark:ring-slate-900">
-                    <RadarIcon /> پیشنهاد قیمت فعال
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-lg ring-2 ring-white dark:ring-slate-900 animate-pulse">
+                    <RadarIcon /> رادار فعال
                 </span>
             )}
         </div>
 
         <div className="flex flex-col sm:flex-row items-center p-4 sm:p-6 gap-6">
             <div className="w-full sm:w-32 h-32 rounded-3xl overflow-hidden flex-shrink-0 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-inner relative">
-                {item.imageUrl && item.imageUrl !== '' ? (
+                {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">🎁</div>

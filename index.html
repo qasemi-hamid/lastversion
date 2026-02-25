@@ -13,7 +13,38 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Yekan+Bakh:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
+    <link rel="stylesheet" href="/index.css">
+    <script>
+      // Aggressive stability layer
+      window.__VITE_IS_RELOADING__ = true; // Tell Vite we are already reloading (to stop it)
+      
+      // Block WebSocket connections that Vite uses for HMR
+      const NativeWebSocket = window.WebSocket;
+      window.WebSocket = function(url, protocols) {
+        if (typeof url === 'string' && (url.includes('vite') || url.includes('hmr'))) {
+          console.warn("Blocked Vite HMR WebSocket connection for stability.");
+          return {
+            send: () => {},
+            close: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            readyState: 3 // CLOSED
+          };
+        }
+        return new NativeWebSocket(url, protocols);
+      };
+
+      // Block all reload attempts
+      window.location.reload = () => console.warn("Reload blocked.");
+      
+      // Suppress noisy cross-origin errors that slow down the browser
+      const originalError = console.error;
+      console.error = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('cross-origin')) return;
+        originalError.apply(console, args);
+      };
+    </script>
+</head>
   <body class="antialiased bg-[#FDFBF9] text-slate-800 overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

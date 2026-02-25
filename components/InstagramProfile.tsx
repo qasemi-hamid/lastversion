@@ -16,7 +16,7 @@ const WalletIcon = () => (
 
 const SettingsIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
 );
@@ -68,6 +68,7 @@ interface InstagramProfileProps {
   allUsers: User[];
   onManageDates: () => void;
   onOpenOrders: () => void;
+  // New prop for the smart reminder
   pendingGiftsCount?: number; 
 }
 
@@ -95,24 +96,15 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
 
       allSourceUsers.forEach(u => {
           (u.importantDates || []).forEach(d => {
-              try {
-                const bDate = new Date(d.date);
-                const target = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
-                
-                // اگر از امروز گذشته، برو به سال بعد
-                if (target < today) {
-                    target.setFullYear(today.getFullYear() + 1);
-                }
-                
-                const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                // تمام مناسبت‌ها را اضافه می‌کنیم (بدون فیلتر ۳۰ روزه)
-                events.push({ owner: u, date: d, daysLeft: diff === -0 ? 0 : diff });
-              } catch (e) {
-                console.error("Invalid date format:", d.date);
+              const bDate = new Date(d.date);
+              const target = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
+              if (target < today) target.setFullYear(today.getFullYear() + 1);
+              const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              if (diff <= 30) {
+                  events.push({ owner: u, date: d, daysLeft: diff });
               }
           });
       });
-      // نمایش نزدیک‌ترین‌ها در ابتدا
       return events.sort((a, b) => a.daysLeft - b.daysLeft);
   }, [user, friends]);
 
@@ -126,7 +118,6 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
 
   const getEventRingColor = (type: DateType, daysLeft: number) => {
       if (daysLeft === 0) return 'from-amber-400 via-rose-500 to-fuchsia-600 animate-spin-slow';
-      if (daysLeft <= 10) return 'from-rose-500 to-orange-500';
       switch(type) {
           case 'birthday': return 'from-pink-500 to-rose-500';
           case 'anniversary': return 'from-red-500 to-orange-500';
@@ -139,7 +130,7 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
       return (
         <div onClick={() => onSelectList(list.id)} className="aspect-square bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/50 dark:border-slate-800 shadow-sm overflow-hidden group cursor-pointer hover:shadow-2xl transition-all relative">
             <div className="h-full w-full relative">
-                {list.coverImage && list.coverImage !== '' ? (
+                {list.coverImage ? (
                     <img src={list.coverImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-rose-500 to-amber-500 flex items-center justify-center relative">
@@ -150,7 +141,7 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
                 )}
                 {isFriend && (
                     <div className="absolute top-3 right-3 z-10 w-8 h-8 rounded-xl border-2 border-white shadow-lg overflow-hidden bg-white">
-                        {owner?.avatar && owner.avatar !== '' ? <img src={owner.avatar} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-slate-100 text-[10px] font-black text-slate-400">{(owner?.name || 'ف').charAt(0)}</div>}
+                        {owner?.avatar ? <img src={owner.avatar} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-slate-100 text-[10px] font-black text-slate-400">{(owner?.name || 'ف').charAt(0)}</div>}
                     </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col justify-end p-4 text-right">
@@ -196,7 +187,7 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
                     </button>
 
                     <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-[2.5rem] border-[6px] border-white dark:border-slate-950 bg-white dark:bg-slate-800 shadow-2xl overflow-hidden flex items-center justify-center">
-                         {user.avatar && user.avatar !== '' ? <img src={user.avatar} className="w-full h-full object-cover" /> : <span className="text-5xl font-black text-slate-300">{user.name.charAt(0)}</span>}
+                         {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : <span className="text-5xl font-black text-slate-300">{user.name.charAt(0)}</span>}
                     </div>
                     <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 text-[9px] font-black px-3 py-0.5 rounded-full shadow-lg border-2 border-white dark:border-slate-900 z-10 whitespace-nowrap">Impact Lv.5 ✨</div>
                 </div>
@@ -208,6 +199,7 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
             <p className="text-xs font-bold text-slate-400 mt-1 dir-ltr opacity-80">{user.email || user.mobile}</p>
             
             <div className="mt-6 flex gap-4 w-full max-w-sm">
+                {/* SMART REMINDER CARD: GIFTS SENT vs RESERVED */}
                 <div className={`flex-1 p-3 rounded-2xl shadow-sm border transition-all duration-500 ${
                     pendingGiftsCount > 0 
                     ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 animate-pulse' 
@@ -225,7 +217,7 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
                 </div>
 
                 <div className="flex-1 bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                    <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">مناسبت‌های لیست</p>
+                    <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">مناسبت‌های نزدیک</p>
                     <p className="text-lg font-black text-slate-800 dark:text-white">{upcomingEvents.length} <span className="text-[10px] font-bold text-slate-400 mr-1">مورد</span></p>
                 </div>
             </div>
@@ -251,28 +243,34 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
 
         <div className="mt-10 px-6">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-r-4 border-rose-500 pr-3">یادآور مناسبت‌ها</h3>
-                <button onClick={onManageDates} className="text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1 rounded-lg">مدیریت لیست</button>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-r-4 border-rose-500 pr-3">مناسبت‌های نزدیک (یادآور)</h3>
+                <button onClick={onManageDates} className="text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1 rounded-lg">مدیریت همه</button>
             </div>
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-2">
                 <button onClick={onManageDates} className="flex flex-col items-center gap-2 flex-shrink-0 group">
                     <div className="w-16 h-16 rounded-full border-2 border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-700 group-hover:border-indigo-400 group-hover:text-indigo-400 transition-all">
                         <PlusIcon className="w-6 h-6" />
                     </div>
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">افزودن</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">افزودن تاریخ</span>
                 </button>
 
                 {upcomingEvents.map((ev, idx) => {
                     const isOwnEvent = ev.owner.id === user.id;
                     return (
                         <div key={`${ev.owner.id}-${idx}`} className="flex flex-col items-center gap-2 flex-shrink-0 group">
-                            <button onClick={isOwnEvent ? onManageDates : () => onSelectList(friendsLists.find(l=>l.ownerId===ev.owner.id)?.id || '')} className="relative">
+                            <button onClick={isOwnEvent ? onAddNewList : () => onSelectList(friendsLists.find(l=>l.ownerId===ev.owner.id)?.id || '')} className="relative">
                                 <div className={`w-16 h-16 rounded-full p-[3px] bg-gradient-to-tr ${getEventRingColor(ev.date.type, ev.daysLeft)} shadow-lg transition-transform group-hover:scale-105`}>
                                     <div className="w-full h-full rounded-full border-2 border-white dark:border-slate-950 overflow-hidden bg-slate-100 dark:bg-slate-800">
                                         {ev.owner.avatar ? <img src={ev.owner.avatar} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-lg font-black text-slate-400">{ev.owner.name.charAt(0)}</div>}
                                     </div>
                                 </div>
                                 <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-900 rounded-full w-6 h-6 flex items-center justify-center text-[10px] shadow-md border border-slate-100 dark:border-slate-800">{getEventEmoji(ev.date.type)}</div>
+                                
+                                {isOwnEvent && (
+                                    <div className="absolute -top-1 -left-1 bg-indigo-600 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-white">
+                                        <PlusIcon className="w-3 h-3" />
+                                    </div>
+                                )}
                             </button>
                             <div className="text-center">
                                 <p className="text-[10px] font-black text-slate-800 dark:text-slate-200 truncate w-20">{isOwnEvent ? (ev.date.label || dateTypeLabels[ev.date.type]) : ev.owner.name.split(' ')[0]}</p>
@@ -283,6 +281,12 @@ const InstagramProfile: React.FC<InstagramProfileProps> = ({
                         </div>
                     );
                 })}
+                
+                {upcomingEvents.length === 0 && (
+                    <div className="flex items-center text-slate-300 dark:text-slate-700 text-[10px] font-bold pr-4">
+                        تاریخ تولد عزیزانتان را اضافه کنید تا هدیه دادن را فراموش نکنید.
+                    </div>
+                )}
             </div>
         </div>
 

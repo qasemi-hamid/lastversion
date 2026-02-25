@@ -36,7 +36,7 @@ const ShippingAddressModal: React.FC<ShippingAddressModalProps> = ({ isOpen, onC
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => setView('address'), 0);
+      setView('address');
     }
   }, [isOpen]);
   

@@ -23,8 +23,18 @@ const ConfettiBg = () => (
 
 const BirthdayCampaignModal: React.FC<BirthdayCampaignModalProps> = ({ isOpen, onClose, currentUser, onUpdateBirthday, products }) => {
   const [view, setView] = useState<'input' | 'countdown' | 'celebrate'>('input');
-  const [daysLeft, setDaysLeft] = useState(0);
   const [bdayInput, setBdayInput] = useState('');
+  const [daysLeft, setDaysLeft] = useState(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (!currentUser.birthday) {
+        setView('input');
+      } else {
+        checkBirthday(currentUser.birthday);
+      }
+    }
+  }, [isOpen, currentUser]);
 
   const checkBirthday = (dateString: string) => {
     const today = new Date();
@@ -44,16 +54,6 @@ const BirthdayCampaignModal: React.FC<BirthdayCampaignModalProps> = ({ isOpen, o
         setView('countdown');
     }
   };
-
-  useEffect(() => {
-    if (isOpen) {
-      if (!currentUser.birthday) {
-        setTimeout(() => setView('input'), 0);
-      } else {
-        setTimeout(() => checkBirthday(currentUser.birthday), 0);
-      }
-    }
-  }, [isOpen, currentUser.birthday]);
 
   const handleSaveBirthday = () => {
       if(!bdayInput) return;

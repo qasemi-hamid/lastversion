@@ -143,7 +143,7 @@ const AddListModal: React.FC<AddListModalProps> = ({ isOpen, onClose, onAddList,
                             <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-2"></div>
                             <span className="text-[10px] text-white font-black">در حال بهینه‌سازی...</span>
                         </div>
-                    ) : (coverImage && coverImage !== '') ? (
+                    ) : coverImage ? (
                         <img src={coverImage} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-rose-600 to-amber-500 opacity-60"></div>

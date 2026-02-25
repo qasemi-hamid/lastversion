@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MicroItem } from '../types';
 import { createOrder } from '../services/api';
 
@@ -66,8 +66,8 @@ const CharityMicroDonationModal: React.FC<CharityMicroDonationModalProps> = ({ i
       }
   };
 
-  const kidNames = useMemo(() => ['علی', 'زهرا', 'محمد', 'سارا', 'امیر', 'نرگس', 'آرش', 'مریم'], []);
-  const randomKidName = useMemo(() => kidNames[Math.floor(Math.random() * kidNames.length)], [kidNames]);
+  const kidNames = ['علی', 'زهرا', 'محمد', 'سارا', 'امیر', 'نرگس', 'آرش', 'مریم'];
+  const randomKidName = kidNames[Math.floor(Math.random() * kidNames.length)];
 
   return (
     <div className="fixed inset-0 bg-black/80 z-[70] flex justify-center items-center p-4" onClick={onClose}>

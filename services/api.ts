@@ -200,7 +200,7 @@ export const addItem = async (listId: string, itemData: any): Promise<WishlistIt
                 price: itemData.price ? Number(itemData.price) : null, 
                 image_url: itemData.imageUrl || '',
                 is_group_gift: itemData.isGroupGift || false, 
-                allow_offers: itemData.allow_offers || false,
+                allow_offers: itemData.allowOffers || false,
                 is_giveaway: itemData.isGiveaway || false,
                 is_urgent: itemData.isUrgent || false,
                 purchased_from: itemData.purchasedFrom || null,
@@ -408,21 +408,7 @@ export const verifyShahkar = async (uId: string, nCode: string, mob: string) => 
     saveDatabase();
     return { success: true, message: 'هویت فروشگاه با موفقیت تایید شد.' }; 
 };
-export const updateUserProfile = async (id: string, u: any) => { 
-    await getSupabaseClient().from('users').update({ 
-        name: u.name, 
-        bio: u.bio, 
-        address: u.address, 
-        shop_name: u.shopName, 
-        national_code: u.nationalCode, 
-        shaba: u.shaba, 
-        account_holder_name: u.accountHolderName, 
-        contact_number: u.contactNumber,
-        important_dates: u.importantDates
-    }).eq('id', id); 
-    const fresh = await getSupabaseClient().from('users').select('*').eq('id', id).single(); 
-    return {...fresh.data, shopName: fresh.data.shop_name, importantDates: fresh.data.important_dates || []}; 
-};
+export const updateUserProfile = async (id: string, u: any) => { await getSupabaseClient().from('users').update({ name: u.name, bio: u.bio, address: u.address, shop_name: u.shopName, national_code: u.nationalCode, shaba: u.shaba, account_holder_name: u.accountHolderName, contact_number: u.contactNumber }).eq('id', id); const fresh = await getSupabaseClient().from('users').select('*').eq('id', id).single(); return {...fresh.data, shopName: fresh.data.shop_name}; };
 export const claimItem = async (itemId: string, userId: string) => { await updateItem(itemId, { claimedBy: userId, status: 'claimed' }); };
 export const unclaimItem = async (itemId: string) => { await updateItem(itemId, { claimedBy: null, status: 'open' }); };
 export const updateList = async (id: string, u: any) => { if (isValidUUID(id)) await getSupabaseClient().from('wishlists').update({ name: u.name, privacy: u.privacy, description: u.description, cover_image: u.coverImage }).eq('id', id); };

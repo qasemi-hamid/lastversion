@@ -87,7 +87,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, wallet }) =>
           const total = wallet.transactions
             .filter(t => t.type === 'contribution' && t.amount > 0)
             .reduce((sum, t) => sum + t.amount, 0);
-          setTimeout(() => setTotalSettled(total), 0);
+          setTotalSettled(total);
       }
   }, [wallet]);
 

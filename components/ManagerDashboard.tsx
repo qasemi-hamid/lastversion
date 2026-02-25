@@ -358,7 +358,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ users, transactions
                          <div className="bg-gradient-to-r from-violet-900/40 to-slate-800 p-6 rounded-xl border border-violet-600/50 shadow-lg">
                              <div className="flex items-center justify-between mb-6">
                                  <div>
-                                    <h3 className="text-xl font-bold text-violet-300 mb-2 flex items-center gap-2"><RadarIcon /> فرصت‌های فروش (پربازدیدترین فروشگاه‌های غیرهمکار)</h3>
+                                    <h3 className="text-xl font-bold text-violet-300 mb-2 flex items-center gap-2"><RadarIcon /> رادار فرصت‌ها (پربازدیدترین فروشگاه‌های غیرهمکار)</h3>
                                     <p className="text-slate-300 text-sm max-w-2xl">این جدول نشان می‌دهد کاربران شما بیشتر روی کدام فروشگاه‌ها کلیک می‌کنند. با این فروشگاه‌ها تماس بگیرید و لینک همکاری (Affiliate) بسازید.</p>
                                  </div>
                              </div>

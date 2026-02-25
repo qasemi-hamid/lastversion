@@ -43,11 +43,9 @@ const ContributeModal: React.FC<ContributeModalProps> = ({ isOpen, onClose, item
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
-        setAmount(0);
-        setError('');
-        setIsAnonymous(false);
-      }, 0);
+      setAmount(0);
+      setError('');
+      setIsAnonymous(false);
     }
   }, [isOpen]);
 

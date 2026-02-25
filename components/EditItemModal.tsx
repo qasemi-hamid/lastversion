@@ -115,7 +115,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({ isOpen, onClose, onSaveIt
                         <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mb-1"></div>
                         <span className="text-[7px] font-black uppercase text-slate-500">بهینه‌سازی...</span>
                     </div>
-                ) : (selectedImageUrl && selectedImageUrl !== '') ? (
+                ) : selectedImageUrl ? (
                     <img src={selectedImageUrl} className="w-full h-full object-cover" alt="Preview" />
                 ) : (
                     <div className="text-slate-400 text-center p-2">

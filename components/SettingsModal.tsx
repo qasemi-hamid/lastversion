@@ -249,7 +249,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 <div className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800 overflow-hidden bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
                                     {isProcessingImage ? (
                                         <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                                    ) : (avatar && avatar !== '') ? (
+                                    ) : avatar ? (
                                         <img src={avatar} className="w-full h-full object-cover" alt="Avatar" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-slate-400">

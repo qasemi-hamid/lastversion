@@ -189,7 +189,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
             <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center shadow-sm z-30">
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg overflow-hidden border border-white/20">
-                        {currentUser.avatar && currentUser.avatar !== '' ? <img src={currentUser.avatar} className="w-full h-full object-cover" /> : <div className="text-xl font-black">{editName.charAt(0)}</div>}
+                        {currentUser.avatar ? <img src={currentUser.avatar} className="w-full h-full object-cover" /> : <div className="text-xl font-black">{editName.charAt(0)}</div>}
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
@@ -225,7 +225,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
                     {[
                         { id: 'overview', label: 'پیشخوان', icon: <HomeIcon /> },
                         { id: 'products', label: 'محصولات', icon: <BoxIcon /> },
-                        { id: 'opportunities', label: 'فرصت‌های فروش', icon: <RadarIcon /> },
+                        { id: 'opportunities', label: 'رادار فرصت‌ها', icon: <RadarIcon /> },
                         { id: 'orders', label: 'سفارشات', icon: <TruckIcon /> },
                         { id: 'social', label: 'ارتباطات', icon: <UserIcon /> },
                         { id: 'account', label: 'امنیت و مالی', icon: <ShieldCheckIcon /> },
@@ -266,7 +266,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
                                 {products.length > 0 ? products.map(p => (
                                     <div key={p.id} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm group hover:shadow-xl transition-all">
                                         <div className="aspect-square bg-slate-50 dark:bg-slate-800 relative overflow-hidden">
-                                            {p.imageUrl && p.imageUrl !== '' ? <img src={p.imageUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">🎁</div>}
+                                            {p.imageUrl ? <img src={p.imageUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">🎁</div>}
                                             <div className="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button onClick={() => { setProductToEdit(p); setIsAddProductOpen(true); }} className="p-2.5 bg-white/90 dark:bg-slate-800/90 rounded-xl text-indigo-600 hover:bg-white transition-all shadow-md">
                                                     <EditIcon />
@@ -294,7 +294,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
                     {activeTab === 'opportunities' && (
                         <div className="space-y-6 animate-fade-in">
                             <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                                <RadarIcon /> آرزوهای داغ (فرصت فروش)
+                                <RadarIcon /> رادار آرزوهای داغ (فرصت‌های فروش)
                             </h2>
                             <p className="text-xs text-slate-500 font-bold -mt-4">محصولاتی که کاربران در لیست‌های خود قرار داده‌اند و منتظر پیشنهاد قیمت هستند.</p>
                             
@@ -303,7 +303,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
                                     <div key={demand.id} className="bg-white dark:bg-slate-900 p-5 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between hover:border-rose-400 transition-all group">
                                         <div className="flex items-center gap-4">
                                             <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 overflow-hidden shadow-inner">
-                                                {demand.imageUrl && demand.imageUrl !== '' ? <img src={demand.imageUrl} className="w-full h-full object-cover" /> : <div className="text-2xl h-full w-full flex items-center justify-center">🎁</div>}
+                                                {demand.imageUrl ? <img src={demand.imageUrl} className="w-full h-full object-cover" /> : <div className="text-2xl h-full w-full flex items-center justify-center">🎁</div>}
                                             </div>
                                             <div>
                                                 <h4 className="font-black text-sm text-slate-900 dark:text-white">{demand.name}</h4>
@@ -324,7 +324,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
                                     </div>
                                 )) : (
                                     <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                                        <p className="text-slate-400 font-bold">فرصت جدیدی یافت نشد.</p>
+                                        <p className="text-slate-400 font-bold">فرصت جدیدی در رادار یافت نشد.</p>
                                     </div>
                                 )}
                             </div>
@@ -354,7 +354,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
                                     <div className="relative z-10">
                                         <h3 className="text-lg font-black mb-2 flex items-center gap-2">⚠️ احراز هویت فروشگاه الزامی است</h3>
-                                        <p className="text-xs opacity-90 leading-relaxed mb-6 font-bold">برای فعال‌سازی تسویه حساب و ثبت پیشنهاد قیمت، باید مالکیت سیم‌کارت و کد ملی شما در سامانه مرکزی تایید شود.</p>
+                                        <p className="text-xs opacity-90 leading-relaxed mb-6 font-bold">برای فعال‌سازی تسویه حساب و ثبت پیشنهاد قیمت در رادار، باید مالکیت سیم‌کارت و کد ملی شما در سامانه مرکزی تایید شود.</p>
                                         <button 
                                             onClick={handleShahkarVerify}
                                             disabled={isShahkarLoading}
@@ -466,7 +466,7 @@ const MerchantDashboard: React.FC<MerchantDashboardProps> = ({
                                     <p className="text-2xl font-black text-indigo-600">{products.length}</p>
                                 </div>
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800">
-                                    <p className="text-slate-400 text-[10px] font-black uppercase mb-1">فرصت‌های فروش</p>
+                                    <p className="text-slate-400 text-[10px] font-black uppercase mb-1">فرصت‌های رادار</p>
                                     <p className="text-2xl font-black text-rose-500">{hotDemands.length}</p>
                                 </div>
                             </div>

@@ -43,11 +43,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, itemName, 
 
   useEffect(() => {
       if (isOpen) {
-          setTimeout(() => {
-              setStep('review');
-              setPayerName('');
-              setIsChecking(false);
-          }, 0);
+          setStep('review');
+          setPayerName('');
+          setIsChecking(false);
       }
   }, [isOpen]);
 

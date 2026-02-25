@@ -25,7 +25,7 @@ const ProfileShareModal: React.FC<ProfileShareModalProps> = ({ isOpen, onClose, 
   useEffect(() => {
     if (isOpen && user) {
         const url = `${window.location.origin}/?user=${user.id}`;
-        setTimeout(() => setShareUrl(url), 0);
+        setShareUrl(url);
     }
   }, [isOpen, user]);
 

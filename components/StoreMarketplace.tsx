@@ -24,13 +24,13 @@ const StoreCard: React.FC<{ merchant: any, onSelect: (m: any) => void, isFeature
         className={`bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer group flex flex-col ${isFeatured ? 'ring-2 ring-indigo-500/20' : ''}`}
     >
         <div className="h-28 bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
-            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url('${(merchant.coverImage && merchant.coverImage !== '') ? merchant.coverImage : 'https://images.unsplash.com/photo-1472851294608-415522f97817?w=400&q=80'}')` }}></div>
+            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url('${merchant.coverImage || 'https://images.unsplash.com/photo-1472851294608-415522f97817?w=400&q=80'}')` }}></div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
             {isFeatured && <div className="absolute top-2 right-2 bg-indigo-600 text-white text-[8px] font-black px-2 py-0.5 rounded-lg shadow-lg">برتر ماه</div>}
         </div>
         <div className="px-4 pb-5 -mt-10 relative z-10 text-center flex-grow">
             <div className="w-16 h-16 mx-auto rounded-2xl border-4 border-white dark:border-slate-800 bg-white dark:bg-slate-800 overflow-hidden shadow-lg flex items-center justify-center">
-                {merchant.avatar && merchant.avatar !== '' ? <img src={merchant.avatar} className="w-full h-full object-cover" /> : <div className="text-xl font-black text-slate-300">{(merchant.shopName||merchant.name||'ف').charAt(0)}</div>}
+                {merchant.avatar ? <img src={merchant.avatar} className="w-full h-full object-cover" /> : <div className="text-xl font-black text-slate-300">{(merchant.shopName||merchant.name||'ف').charAt(0)}</div>}
             </div>
             <h4 className="font-black text-sm mt-3 flex items-center justify-center gap-1 text-slate-900 dark:text-white truncate px-2">
                 {merchant.shopName || merchant.name} <VerifiedBadge />

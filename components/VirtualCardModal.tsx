@@ -27,7 +27,7 @@ const VirtualCardModal: React.FC<VirtualCardModalProps> = ({ isOpen, onClose, ca
 
   useEffect(() => {
     if (isOpen && card) {
-      setTimeout(() => setIsExpired(false), 0);
+      setIsExpired(false);
       
       const calculateTimeLeft = () => {
           const now = Date.now();

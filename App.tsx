@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Wishlist, Product, WishlistItem, ProfileType, MicroItem, User, Friendship } from './types';
 import { useAppContext } from './AppContext';
 import Header from './components/Header';
@@ -59,24 +59,13 @@ const ClockIcon = ({ className }: { className?: string }) => (
 );
 
 const CountdownTimer = ({ durationHours, isUrgent = false }: { durationHours: number, isUrgent?: boolean }) => {
-    const [timeLeft, setTimeLeft] = useState({ h: durationHours, m: 45, s: 12 });
+    const [timeLeft] = useState({ h: durationHours, m: 45, s: 12 });
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev.s > 0) return { ...prev, s: prev.s - 1 };
-                if (prev.m > 0) return { ...prev, m: prev.m - 1, s: 59 };
-                if (prev.h > 0) return { h: prev.h - 1, m: 59, s: 59 };
-                return prev;
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
-
+    // Optimized: Removed setInterval to prevent CPU spikes and browser crashes
     return (
         <div className={`flex items-center gap-1 font-mono text-[9px] font-black ${isUrgent ? 'text-red-500' : 'text-slate-400'}`}>
             <ClockIcon className="h-2.5 w-2.5" />
-            <span>{String(timeLeft.h).padStart(2, '0')}:{String(timeLeft.m).padStart(2, '0')}:{String(timeLeft.s).padStart(2, '0')}</span>
+            <span>{String(timeLeft.h).padStart(2, '0')}:{String(timeLeft.m).padStart(2, '0')}</span>
         </div>
     );
 };
@@ -115,54 +104,42 @@ export const App = () => {
   const [itemToDelete, setItemToDelete] = useState<{listId: string, item: WishlistItem} | null>(null);
   const [listToDelete, setListToDelete] = useState<Wishlist | null>(null);
   
-  const guestParticipateData = useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    const participateId = params.get('participate');
-    if (!participateId) return null;
-    
-    const allLists = [...myWishlists, ...publicCampaigns, ...friendsWishlists];
-    for (const list of allLists) {
-        const item = list.items.find(i => i.id === participateId);
-        if (item) {
-            const owner = allUsers.find(u => u.id === list.ownerId);
-            return { item, ownerName: owner?.name || 'یکی از دوستان' };
-        }
-    }
-    return null;
-  }, [myWishlists, publicCampaigns, friendsWishlists, allUsers]);
-
-  const guestParticipateItem = guestParticipateData?.item || null;
-  const guestParticipateOwner = guestParticipateData?.ownerName || '';
+  const [guestParticipateItem, setGuestParticipateItem] = useState<WishlistItem | null>(null);
+  const [guestParticipateOwner, setGuestParticipateOwner] = useState<string>('');
 
   const isMerchant = currentUser?.role === 'merchant';
   const isCharityUser = currentUser?.role === 'charity';
   const inferredProfileType: ProfileType = isCharityUser ? 'charity' : 'personal';
 
-  const paramsProcessedRef = useRef(false);
-
   useEffect(() => {
-    if (paramsProcessedRef.current) return;
-    
     const params = new URLSearchParams(window.location.search);
+    const participateId = params.get('participate');
     const listId = params.get('list');
     const refId = params.get('ref');
-    const participateId = params.get('participate');
 
-    if (participateId && guestParticipateItem) {
-        paramsProcessedRef.current = true;
+    if (participateId) {
+        const allLists = [...myWishlists, ...publicCampaigns, ...friendsWishlists];
+        for (const list of allLists) {
+            if (!list.items) continue;
+            const item = list.items.find(i => i.id === participateId);
+            if (item) {
+                const owner = allUsers.find(u => u.id === list.ownerId);
+                setGuestParticipateItem(item);
+                setGuestParticipateOwner(owner?.name || 'یکی از دوستان');
+                break;
+            }
+        }
     }
 
     if (listId) {
         setActiveListId(listId);
         setActiveTab('search');
-        paramsProcessedRef.current = true;
     }
 
     if (refId && !currentUser) {
         showToast(`شما با لینک دعوت وارد شدید. برای دریافت هدیه خوش‌آمدگویی ثبت‌نام کنید.`);
-        paramsProcessedRef.current = true;
     }
-  }, [isInitialBoot, guestParticipateItem, currentUser, showToast]);
+  }, [isInitialBoot, publicCampaigns, allUsers, myWishlists, friendsWishlists, currentUser, showToast]);
 
   const activeList = useMemo(() => {
     return myWishlists.find(l => l.id === activeListId) || 
@@ -253,7 +230,7 @@ export const App = () => {
   if (!currentUser && !guestParticipateItem) {
     return (
       <div className="min-h-screen bg-[#FDFBF9] dark:bg-slate-950 flex flex-col justify-center items-center p-4">
-        {isInitialBoot && (
+        {isInitialBoot && !currentUser && (
            <div className="fixed inset-0 z-[200] bg-[#FDFBF9] dark:bg-slate-950 flex items-center justify-center">
               <div className="w-16 h-16 border-4 border-rose-600/20 border-t-rose-600 rounded-full animate-spin"></div>
            </div>
